@@ -35,13 +35,18 @@ void LogicFunctionList::insert(LogicFunction *f)
 
 void LogicFunctionList::remove(LogicFunction *f)
 {
-	for (LogicFunctionElm **elm=&head; *elm; elm=&((*elm)->m_next))
+	LogicFunctionElm **elm=&head;
+	while((*elm) != nullptr)
 	{
 		if ( (*elm)->m_function == f)
 		{
 			LogicFunctionElm *next = (*elm)->m_next;
 			delete (*elm);
 			(*elm) = next;
+		}
+		else
+		{
+			(*elm) = (*elm)->m_next;
 		}
 	}
 }
