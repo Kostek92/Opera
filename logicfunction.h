@@ -1,39 +1,73 @@
-/* Logical function */
 #ifndef LOGICFUNCTION_H
 #define LOGICFUNCTION_H
 
+#include <string>
+#include <vector>
 
-class LogicFunction {
+/**
+ * @brief Interface class for logic functions that calculates logic output based on input
+ */
+class LogicFunctionInterface
+{
 public:
-
-	// inputs/output are char: 't','f','x'
-	// tableentries are strings of numinputs inputs + resulting output
-	LogicFunction(const char *name, int numinputs, const char **table);
-	~LogicFunction();
-
-	static LogicFunction *findFunction(const char *name);
-
-	char calculate(char *inputs);
-
-	int m_numinputs;
-	char *m_name;
-	const char **m_table;
+	virtual ~LogicFunctionInterface() {}
+	virtual char calculate(const std::vector<char> &inputs) const = 0;
+	virtual int getNumInputs() const = 0;
+	virtual std::string getName() const = 0;
 };
 
-
-class LogicProcessor {
+/**
+ * @brief Implements logical functions as given by a truth table.
+ */
+class LogicFunction : public LogicFunctionInterface
+{
 public:
-	LogicProcessor( LogicFunction *function );
-	~LogicProcessor();
+	/**
+	 *	@param[in] table		Truth table of given function containing numinputs inputs + resulting output.
+								Inputs/output are char: 't','f','x'
+		@param[in] numinputs	How many inputs chars are expected in single row of truth table
+	 */
+	LogicFunction(const std::string& name, int numinputs, const char **table);
+	~LogicFunction() override;
 
-	void setInput(int input, LogicProcessor *lf);
-	void setInput(int input, char * source);
+	/**
+	 * @brief Return output from m_table if given input is found in m_table
+	 */
+	char calculate(const std::vector<char> &inputs) const override;
+	int getNumInputs() const override;
+	std::string getName() const override;
 
-	char process();
+private:
+	std::string m_name;
+	int m_numinputs;
+	std::vector<const char*> m_table;
+};
 
-	char **m_inputsources;
-	LogicProcessor **m_inputfunctions;
-	LogicFunction *m_logicfunction;
+/**
+ * @brief Calculate output from logical function. Can be combined with other LogicProcessors
+ */
+class LogicProcessor
+{
+public:
+	explicit LogicProcessor(LogicFunctionInterface* function);
+
+	/**
+	* @brief Set additional processor for combinatorial cases
+	*/
+	void setInput(int inputIndex, LogicProcessor* processor);
+	/**
+	* @brief Set currently processed input
+	*/
+	void setInput(int inputIndex, char* source);
+	/**
+	* @brief Calculates logical output from currently set input function and processor
+	*/
+	char process() const;
+
+private:
+	std::vector<char*> m_inputsources;
+	std::vector<LogicProcessor*> m_inputfunctions;
+	LogicFunctionInterface* m_logicfunction;
 };
 
 #endif // LOGICFUNCTION_H

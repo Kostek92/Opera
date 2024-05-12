@@ -1,7 +1,6 @@
 /* Logical function */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "logicfunction.h"
@@ -10,37 +9,36 @@ class LogicFunctionList {
 private:
 
 	struct LogicFunctionElm {
-		LogicFunction *m_function;
+		LogicFunctionInterface *m_function;
 		struct LogicFunctionElm *m_next;
 	};
 
 	static struct LogicFunctionElm *head;
 
 public:
-	static void insert(LogicFunction *f);
-	static void remove(LogicFunction *f);
-	static LogicFunction *find(const char *name);
+	static void insert(LogicFunctionInterface *function);
+	static void remove(LogicFunctionInterface *function);
+	static LogicFunctionInterface *find(const std::string& name);
 };
 
 LogicFunctionList::LogicFunctionElm *LogicFunctionList::head;
 
-void LogicFunctionList::insert(LogicFunction *f)
+void LogicFunctionList::insert(LogicFunctionInterface *function)
 {
 	struct LogicFunctionElm *oldhead=head;
 	head = new struct LogicFunctionElm;
-	head->m_function = f;
+	head->m_function = function;
 	head->m_next = oldhead;
 }
 
-
-void LogicFunctionList::remove(LogicFunction *f)
+void LogicFunctionList::remove(LogicFunctionInterface *function)
 {
-	LogicFunctionElm **elm=&head;
+	auto **elm=&head;
 	while((*elm) != nullptr)
 	{
-		if ( (*elm)->m_function == f)
+		if ( (*elm)->m_function == function)
 		{
-			LogicFunctionElm *next = (*elm)->m_next;
+			auto *next = (*elm)->m_next;
 			delete (*elm);
 			(*elm) = next;
 		}
@@ -51,97 +49,100 @@ void LogicFunctionList::remove(LogicFunction *f)
 	}
 }
 
-LogicFunction *LogicFunctionList::find(const char *name)
+LogicFunctionInterface *LogicFunctionList::find(const std::string& name)
 {
-	for (LogicFunctionElm *elm=head; elm; elm=elm->m_next)
+	for (const auto *elm=head; elm; elm=elm->m_next)
 	{
-		if (0 == strcmp(name, elm->m_function->m_name) )
+		if (elm->m_function->getName() == name )
 		{
 			return elm->m_function;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
-
-LogicFunction::LogicFunction(const char *name, int numinputs, const char **table) :
-	m_numinputs(numinputs), m_table(table)
+LogicFunction::LogicFunction(const std::string& name, int numinputs, const char **table)
+	: m_name(name),
+	m_numinputs(numinputs),
+	m_table(table, table + numinputs + 1)
 {
-	if (LogicFunction *lf = LogicFunctionList::find(name))
+	if (auto lf = LogicFunctionList::find(name))
 	{
-		fprintf(stderr, "Warning: Duplicate definition of LogicFunction \"%s\"\n", name);
+		fprintf(stderr, "Warning: Duplicate definition of LogicFunction \"%s\"\n", name.c_str());
 		delete lf;
 	}
-	m_name = strdup(name);
 	LogicFunctionList::insert(this);
 }
 
 LogicFunction::~LogicFunction()
 {
 	LogicFunctionList::remove(this);
-	free(m_name);
 }
 
-LogicFunction *LogicFunction::findFunction(const char *name)
+char LogicFunction::calculate(const std::vector<char>& inputs) const
 {
-	return LogicFunctionList::find(name);
-}
-
-char LogicFunction::calculate(char *inputs)
-{
-	for (const char **t=m_table; *t ; t++)
+	for (const auto& tableEntry : m_table)
 	{
-		int i;
-		for (i=0; (*t)[i] == 'x' || inputs[i] == (*t)[i] ; )
+		if(tableEntry)
 		{
-			if (++i == m_numinputs )
-				return (*t)[i];
+			int i;
+			for (i=0; tableEntry[i] == 'x' || inputs[i] == tableEntry[i] ; )
+			{
+				if (++i == m_numinputs )
+					return tableEntry[i];
+			}
 		}
 	}
 	return 'x';
 }
 
-
-LogicProcessor::LogicProcessor( LogicFunction *function )
-	: m_logicfunction ( function )
+int LogicFunction::getNumInputs() const
 {
-	m_inputsources = new char * [ function->m_numinputs ];
-	m_inputfunctions = new LogicProcessor * [ function->m_numinputs ];
-	for (int i=0; i<function->m_numinputs; i++)
+	return m_numinputs;
+}
+
+std::string LogicFunction::getName() const
+{
+	return m_name;
+}
+
+LogicProcessor::LogicProcessor(LogicFunctionInterface* function)
+	: m_logicfunction(function)
+{
+	m_inputsources.resize(m_logicfunction->getNumInputs(), 0);
+	m_inputfunctions.resize(m_logicfunction->getNumInputs(), nullptr);
+}
+
+void LogicProcessor::setInput(int inputIndex, LogicProcessor* processor)
+{
+	if(inputIndex < 0 || inputIndex >= m_inputfunctions.size())
 	{
-		m_inputsources[i] = 0;
-		m_inputfunctions[i] = 0;
+		fprintf(stderr, "Warning: Invalid input index for processor \"%i\"\n", inputIndex);
+		return;
 	}
+	m_inputfunctions[inputIndex] = processor;
 }
 
-
-LogicProcessor::~LogicProcessor()
+void LogicProcessor::setInput(int inputIndex, char* source)
 {
-	delete [] m_inputsources;
-	delete [] m_inputfunctions;
+	if(inputIndex < 0 || inputIndex >= m_inputsources.size())
+	{
+		fprintf(stderr, "Warning: Invalid input index for sources \"%i\"\n", inputIndex);
+		return;
+	}
+	m_inputsources[inputIndex] = source;
 }
 
-void LogicProcessor::setInput(int input, LogicProcessor *lf)
+char LogicProcessor::process() const
 {
-	m_inputfunctions[input] = lf;
-}
+	std::vector<char> inputs(m_logicfunction->getNumInputs());
 
-void LogicProcessor::setInput(int input, char * source)
-{
-	m_inputsources[input] = source;
-}
-
-char LogicProcessor::process()
-{
-	char *inputs = new char [ m_logicfunction->m_numinputs ];
-
-	for (int i=0;i<m_logicfunction->m_numinputs;i++)
+	for (size_t i = 0; i < m_logicfunction->getNumInputs(); ++i)
 	{
 		inputs[i] =  m_inputsources[i] ? *m_inputsources[i] :
-			m_inputfunctions[i] ? m_inputfunctions[i]->process() : 0;
+						m_inputfunctions[i] ? m_inputfunctions[i]->process() : 0;
 	}
-	char output=m_logicfunction->calculate(inputs);
-	delete [] inputs;
+
+	char output = m_logicfunction->calculate(inputs);
 	return output;
 }
-

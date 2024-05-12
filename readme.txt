@@ -55,20 +55,36 @@ Pierwsza wycena:
 4) 1.5h
 5) 1.5h
 
-I decided to start with point 3. Passing unit tests are really helpfull base for any refactors
-
-
-
-
+I decided to start with point 3. Passing tests are really helpfull base for any refactors
 3) In method void LogicFunctionList::remove(LogicFunction *f) we were skipping 2 nodes of list in every iteration instead of one:
 elm=&((*elm)->m_next
 (*elm) = next. 
 In for loop we first check if *elm is nullptr, then we update elm with (*elm) = next; in for loop body and then we try to update elm=&((*elm)->m_next) again.
 During second update of elm, we use (*elm)->m_next, but *elm is already nullptr which is Undefined Behaviour.
-
 Fix was to use while loop instead which updates *elm only once. 
 
+1) Improvements done
+Use interface for logic function
+Use vector for easier memory managment
+Make class members private
+Use const methods when possible
+Use std::string instead of const char* for name
+Remove unused method findFunction
+return nullptr instead of 0
+Use full name in arguments intead of one letters shortcuts
+
+2)
 
 Prawdziwy czas:
 
-3) 0.5h
+3) 1h
+1) 5h
+2) 0.5h
+
+
+*** Nie zmienilem bo:
+
+nie zmienialem nazw memberkow klas i argumentow bo zachowuja spojnosc 
+I didn't use std::string or smart_pointers assuming that we want to use as few libraries as possible
+
+Nie podoba mi sie ze name jest potrzebny w logicFunctionList i wiaze te klasy ze soba

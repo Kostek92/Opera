@@ -118,10 +118,10 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 void function_test ( LogicFunction *func )
 {
 	char *inp;
-	char n=func->m_numinputs;
+	char n=func->getNumInputs();
 	LogicProcessor proc(func);
 
-	printf("Testing function: %s\n", func->m_name);
+	printf("Testing function: %s\n", func->getName().c_str());
 	inp = new char [n];
 	for (int i=0; i<n; i++)
 	{
@@ -148,7 +148,7 @@ int main()
 		f_implies("implies", 2, impl_table);
 
 	LogicFunction
-		f_incomplete("incomplete",3, incl_table);
+		f_incomplete("incomplete",1, incl_table);
 
 // Basic table tests
 	function_test(&f_not);
