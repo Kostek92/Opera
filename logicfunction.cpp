@@ -64,7 +64,7 @@ LogicFunctionInterface *LogicFunctionList::find(const std::string& name)
 LogicFunction::LogicFunction(const std::string& name, int numinputs, const char **table)
 	: m_name(name),
 	m_numinputs(numinputs),
-	m_table(table, table + numinputs + 1)
+	m_table(table)
 {
 	if (auto lf = LogicFunctionList::find(name))
 	{
@@ -81,16 +81,13 @@ LogicFunction::~LogicFunction()
 
 char LogicFunction::calculate(const std::vector<char>& inputs) const
 {
-	for (const auto& tableEntry : m_table)
+	for (const char **t=m_table; *t ; t++)
 	{
-		if(tableEntry)
+		int i;
+		for (i=0; (*t)[i] == 'x' || inputs[i] == (*t)[i] ; )
 		{
-			int i;
-			for (i=0; tableEntry[i] == 'x' || inputs[i] == tableEntry[i] ; )
-			{
-				if (++i == m_numinputs )
-					return tableEntry[i];
-			}
+			if (++i == m_numinputs )
+				return (*t)[i];
 		}
 	}
 	return 'x';

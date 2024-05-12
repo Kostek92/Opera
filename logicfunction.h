@@ -40,7 +40,7 @@ public:
 private:
 	std::string m_name;
 	int m_numinputs;
-	std::vector<const char*> m_table;
+	const char **m_table;
 };
 
 /**
