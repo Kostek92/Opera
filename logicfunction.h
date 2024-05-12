@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 /**
  * @brief Interface class for logic functions that calculates logic output based on input
@@ -19,7 +20,7 @@ public:
 /**
  * @brief Implements logical functions as given by a truth table.
  */
-class LogicFunction : public LogicFunctionInterface
+class TableLogicFunction : public LogicFunctionInterface
 {
 public:
 	/**
@@ -27,11 +28,11 @@ public:
 								Inputs/output are char: 't','f','x'
 		@param[in] numinputs	How many inputs chars are expected in single row of truth table
 	 */
-	LogicFunction(const std::string& name, int numinputs, const char **table);
-	~LogicFunction() override;
+	TableLogicFunction(const std::string& name, int numinputs, const char **table);
+	~TableLogicFunction() override;
 
 	/**
-	 * @brief Return output from m_table if given input is found in m_table
+	 * @brief Returns output from m_table if given input is found in m_table
 	 */
 	char calculate(const std::vector<char> &inputs) const override;
 	int getNumInputs() const override;
@@ -41,6 +42,31 @@ private:
 	std::string m_name;
 	int m_numinputs;
 	const char **m_table;
+};
+
+/**
+ * @brief Implements logical functions as given by a truth table.
+ */
+class CodeLogicFunction : public LogicFunctionInterface
+{
+public:
+	using FunctionType =  std::function<char (const std::vector<char> &)>;
+	CodeLogicFunction(const std::string& name, int numinputs, FunctionType customfunction);
+
+	~CodeLogicFunction() override;
+
+	/**
+	 * @brief Calculates output bases on input and m_function
+	 */
+	char calculate(const std::vector<char> &inputs) const override;
+	int getNumInputs() const override;
+	std::string getName() const override;
+
+
+private:
+	std::string m_name;
+	int m_numinputs;
+	FunctionType m_function;
 };
 
 /**

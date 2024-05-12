@@ -115,7 +115,7 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 }
 
 
-void function_test ( LogicFunction *func )
+void function_test ( LogicFunctionInterface *func )
 {
 	char *inp;
 	char n=func->getNumInputs();
@@ -133,11 +133,9 @@ void function_test ( LogicFunction *func )
 	delete [] inp;
 }
 
-
-
 int main()
 {
-	LogicFunction
+	TableLogicFunction
 		f_not("not",1,not_table),
 		f_and2("and2",2,and2_table),
 		f_and3("and3",3,and3_table),
@@ -147,8 +145,8 @@ int main()
 		f_xor3("xor3",3,xor3_table),
 		f_implies("implies", 2, impl_table);
 
-	LogicFunction
-		f_incomplete("incomplete",1, incl_table);
+	TableLogicFunction
+		f_incomplete("incomplete",3, incl_table);
 
 // Basic table tests
 	function_test(&f_not);
@@ -190,4 +188,19 @@ int main()
 
 		processor_test(&p_and, 3, inputs);
 	}
+
+	//Code table test
+	auto xorFunction = [](const std::vector<char> &inputs)
+	{
+		int trueCount = 0;
+		for (char input : inputs) {
+			if (input == 't') {
+				trueCount++;
+			}
+		}
+		return trueCount % 2 == 1 ? 't' : 'f';
+	};
+	CodeLogicFunction f_codeXor3("xor3_code", 3, xorFunction);
+	function_test(&f_codeXor3);
+
 }

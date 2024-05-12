@@ -61,7 +61,7 @@ LogicFunctionInterface *LogicFunctionList::find(const std::string& name)
 	return nullptr;
 }
 
-LogicFunction::LogicFunction(const std::string& name, int numinputs, const char **table)
+TableLogicFunction::TableLogicFunction(const std::string& name, int numinputs, const char **table)
 	: m_name(name),
 	m_numinputs(numinputs),
 	m_table(table)
@@ -74,12 +74,12 @@ LogicFunction::LogicFunction(const std::string& name, int numinputs, const char 
 	LogicFunctionList::insert(this);
 }
 
-LogicFunction::~LogicFunction()
+TableLogicFunction::~TableLogicFunction()
 {
 	LogicFunctionList::remove(this);
 }
 
-char LogicFunction::calculate(const std::vector<char>& inputs) const
+char TableLogicFunction::calculate(const std::vector<char>& inputs) const
 {
 	for (const char **t=m_table; *t ; t++)
 	{
@@ -93,12 +93,12 @@ char LogicFunction::calculate(const std::vector<char>& inputs) const
 	return 'x';
 }
 
-int LogicFunction::getNumInputs() const
+int TableLogicFunction::getNumInputs() const
 {
 	return m_numinputs;
 }
 
-std::string LogicFunction::getName() const
+std::string TableLogicFunction::getName() const
 {
 	return m_name;
 }
@@ -143,3 +143,37 @@ char LogicProcessor::process() const
 	char output = m_logicfunction->calculate(inputs);
 	return output;
 }
+
+CodeLogicFunction::CodeLogicFunction(const std::string &name, int numinputs, FunctionType customfunction)
+	: m_name(name)
+	, m_numinputs(numinputs)
+	, m_function(customfunction)
+{
+	if (auto lf = LogicFunctionList::find(name))
+	{
+		fprintf(stderr, "Warning: Duplicate definition of LogicFunction \"%s\"\n", name.c_str());
+		delete lf;
+	}
+	LogicFunctionList::insert(this);
+}
+
+CodeLogicFunction::~CodeLogicFunction()
+{
+	LogicFunctionList::remove(this);
+}
+
+char CodeLogicFunction::calculate(const std::vector<char> &inputs) const
+{
+	return m_function(inputs);
+}
+
+int CodeLogicFunction::getNumInputs() const
+{
+	return m_numinputs;
+}
+
+std::string CodeLogicFunction::getName() const
+{
+	return m_name;
+}
+
