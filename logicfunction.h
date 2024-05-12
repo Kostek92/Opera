@@ -17,55 +17,66 @@ public:
 	virtual std::string getName() const = 0;
 };
 
+class LogicFunctionBase : public LogicFunctionInterface
+{
+public:
+	/**
+		@param[in] numinputs	How many inputs chars are expected in single row of truth table
+	 */
+	LogicFunctionBase(const std::string& name, int numinputs);
+	~LogicFunctionBase() override;
+
+	int getNumInputs() const override;
+	std::string getName() const override;
+
+protected:
+	std::string m_name;
+	int m_numinputs;
+};
+
 /**
  * @brief Implements logical functions as given by a truth table.
  */
-class TableLogicFunction : public LogicFunctionInterface
+class TableLogicFunction : public LogicFunctionBase
 {
 public:
 	/**
 	 *	@param[in] table		Truth table of given function containing numinputs inputs + resulting output.
 								Inputs/output are char: 't','f','x'
-		@param[in] numinputs	How many inputs chars are expected in single row of truth table
 	 */
 	TableLogicFunction(const std::string& name, int numinputs, const char **table);
-	~TableLogicFunction() override;
+	~TableLogicFunction() override = default;
 
 	/**
 	 * @brief Returns output from m_table if given input is found in m_table
 	 */
 	char calculate(const std::vector<char> &inputs) const override;
-	int getNumInputs() const override;
-	std::string getName() const override;
 
 private:
-	std::string m_name;
-	int m_numinputs;
 	const char **m_table;
 };
 
 /**
  * @brief Implements logical functions as given by a truth table.
  */
-class CodeLogicFunction : public LogicFunctionInterface
+class CodeLogicFunction : public LogicFunctionBase
 {
 public:
 	using FunctionType =  std::function<char (const std::vector<char> &)>;
-	CodeLogicFunction(const std::string& name, int numinputs, FunctionType customfunction);
-
-	~CodeLogicFunction() override;
 
 	/**
-	 * @brief Calculates output bases on input and m_function
+	 *	@param[in] table		Function handled truth table logic
+								Inputs/output are char: 't','f','x'
+	 */
+	CodeLogicFunction(const std::string& name, int numinputs, FunctionType customfunction);
+	~CodeLogicFunction() override = default;
+
+	/**
+	 * @brief Calculates output based on inputs and m_function
 	 */
 	char calculate(const std::vector<char> &inputs) const override;
-	int getNumInputs() const override;
-	std::string getName() const override;
-
 
 private:
-	std::string m_name;
-	int m_numinputs;
 	FunctionType m_function;
 };
 

@@ -192,15 +192,9 @@ int main()
 	//Code table test
 	auto xorFunction = [](const std::vector<char> &inputs)
 	{
-		int trueCount = 0;
-		for (char input : inputs) {
-			if (input == 't') {
-				trueCount++;
-			}
-		}
+		const auto trueCount = std::count_if(inputs.begin(), inputs.end(), [](auto element) { return element == 't'; });
 		return trueCount % 2 == 1 ? 't' : 'f';
 	};
 	CodeLogicFunction f_codeXor3("xor3_code", 3, xorFunction);
 	function_test(&f_codeXor3);
-
 }

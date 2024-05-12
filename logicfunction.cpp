@@ -61,10 +61,9 @@ LogicFunctionInterface *LogicFunctionList::find(const std::string& name)
 	return nullptr;
 }
 
-TableLogicFunction::TableLogicFunction(const std::string& name, int numinputs, const char **table)
-	: m_name(name),
-	m_numinputs(numinputs),
-	m_table(table)
+LogicFunctionBase::LogicFunctionBase(const std::string &name, int numinputs)
+	: m_name(name)
+	, m_numinputs(numinputs)
 {
 	if (auto lf = LogicFunctionList::find(name))
 	{
@@ -74,9 +73,26 @@ TableLogicFunction::TableLogicFunction(const std::string& name, int numinputs, c
 	LogicFunctionList::insert(this);
 }
 
-TableLogicFunction::~TableLogicFunction()
+LogicFunctionBase::~LogicFunctionBase()
 {
 	LogicFunctionList::remove(this);
+}
+
+int LogicFunctionBase::getNumInputs() const
+{
+	return m_numinputs;
+}
+
+std::string LogicFunctionBase::getName() const
+{
+	return m_name;
+}
+
+TableLogicFunction::TableLogicFunction(const std::string& name, int numinputs, const char **table)
+	: LogicFunctionBase(name, numinputs)
+	, m_table(table)
+{
+
 }
 
 char TableLogicFunction::calculate(const std::vector<char>& inputs) const
@@ -93,15 +109,6 @@ char TableLogicFunction::calculate(const std::vector<char>& inputs) const
 	return 'x';
 }
 
-int TableLogicFunction::getNumInputs() const
-{
-	return m_numinputs;
-}
-
-std::string TableLogicFunction::getName() const
-{
-	return m_name;
-}
 
 LogicProcessor::LogicProcessor(LogicFunctionInterface* function)
 	: m_logicfunction(function)
@@ -145,35 +152,13 @@ char LogicProcessor::process() const
 }
 
 CodeLogicFunction::CodeLogicFunction(const std::string &name, int numinputs, FunctionType customfunction)
-	: m_name(name)
-	, m_numinputs(numinputs)
+	: LogicFunctionBase(name, numinputs)
 	, m_function(customfunction)
 {
-	if (auto lf = LogicFunctionList::find(name))
-	{
-		fprintf(stderr, "Warning: Duplicate definition of LogicFunction \"%s\"\n", name.c_str());
-		delete lf;
-	}
-	LogicFunctionList::insert(this);
-}
 
-CodeLogicFunction::~CodeLogicFunction()
-{
-	LogicFunctionList::remove(this);
 }
 
 char CodeLogicFunction::calculate(const std::vector<char> &inputs) const
 {
 	return m_function(inputs);
 }
-
-int CodeLogicFunction::getNumInputs() const
-{
-	return m_numinputs;
-}
-
-std::string CodeLogicFunction::getName() const
-{
-	return m_name;
-}
-
