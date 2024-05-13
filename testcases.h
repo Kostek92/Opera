@@ -294,3 +294,6 @@ static const char * testcases[] = {
 "ttfffftt"
 "fttffttf"
 "ffttttff" };
+static constexpr int gridLength = 8;
+static constexpr int gridSize = gridLength * gridLength;
+static constexpr auto testCasesCount = sizeof(testcases) /  sizeof(testcases[0]);

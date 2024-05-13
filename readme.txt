@@ -73,13 +73,17 @@ Remove unused method findFunction
 return nullptr instead of 0
 Use full name in arguments intead of one letters shortcuts
 
-2)
+2) Done
+
+3)
 
 Prawdziwy czas:
 
 3) 1h
 1) 5h
 2) 0.5h
+4) 0.5h
+5) 2h
 
 
 *** Nie zmienilem bo:

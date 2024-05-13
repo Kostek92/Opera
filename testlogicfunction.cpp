@@ -2,9 +2,12 @@
  * Test software
  */
 
+#include <cassert>
 #include <stdio.h>
+#include <algorithm>
 
 #include "logicfunction.h"
+#include "testcases.h"
 
 const char *or2_table [] =
 {
@@ -83,6 +86,55 @@ const char *incl_table [] =
 0
 };
 
+bool isSymmetrical(const std::vector<char> &input)
+{
+	for (int i = 0; i < input.size() / 2; ++i)
+	{
+		if (input[i] != input[input.size() - i - 1])
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+auto gridHorizontalSymmetryFunction = [](const std::vector<char> &inputs)
+{
+	assert(gridSize == inputs.size());
+	for (int i = 0; i < inputs.size(); i+=gridLength )
+	{
+		auto horizontalLine = std::vector<char>(inputs.begin() + i, inputs.begin() + i + gridLength);
+		if(!isSymmetrical(horizontalLine))
+		{
+			return false;
+		}
+	}
+	return true;
+};
+
+auto gridVerticalSymmetryFunction = [](const std::vector<char> &inputs)
+{
+	assert(gridSize == inputs.size());
+	for (int column = 0; column < gridLength; ++column )
+	{
+		std::vector<char> verticalLine(gridLength);
+		for (int row = 0; row < gridLength; ++row)
+		{
+			verticalLine[row] = inputs[row * gridLength + column];
+		}
+		if(!isSymmetrical(verticalLine))
+		{
+			return false;
+		}
+	}
+	return true;
+};
+
+auto gridRotationalSymmetryFunction = [](const std::vector<char> &inputs)
+{
+	return gridHorizontalSymmetryFunction(inputs) && gridVerticalSymmetryFunction(inputs);
+};
+
 void processor_test(LogicProcessor *proc, int n, char *inp)
 {
 	int i;
@@ -114,7 +166,6 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 
 }
 
-
 void function_test ( LogicFunctionInterface *func )
 {
 	char *inp;
@@ -131,6 +182,65 @@ void function_test ( LogicFunctionInterface *func )
 	processor_test(&proc, n, inp);
 
 	delete [] inp;
+}
+
+void grid_symmetry_test(LogicProcessor *proc, int numinputs, const std::vector<bool>& expectedSymmetry)
+{
+	const bool debugOnlyFail = false;
+	assert(expectedSymmetry.size() == testCasesCount);
+	for(int testCaseIndex = 0; testCaseIndex < testCasesCount; ++testCaseIndex)
+	{
+		for (int i=0; i<numinputs; i++)
+		{
+			proc->setInput(i, testcases[testCaseIndex]+i);
+		}
+		const bool isSymmetrical= proc->process();
+		const bool testCasePassed = isSymmetrical == expectedSymmetry.at(testCaseIndex);
+		if(!debugOnlyFail || !testCasePassed)
+		{
+			printf("Test case %d %s\n", testCaseIndex+1, testCasePassed ? "PASS" : "FAIL");
+		}
+	}
+}
+
+void horizontal_symmetry_test()
+{
+	CodeLogicFunction f_horizontalSymmetry("horizontal_symmetry", gridSize, gridHorizontalSymmetryFunction);
+	LogicProcessor proc (&f_horizontalSymmetry);
+
+	std::vector<bool> expectedSymmetry(testCasesCount, false);
+	std::fill(expectedSymmetry.begin(), expectedSymmetry.begin() + 16, true);
+
+	printf("Testing function: %s\n", f_horizontalSymmetry.getName().c_str());
+
+	grid_symmetry_test(&proc, f_horizontalSymmetry.getNumInputs(), expectedSymmetry);
+}
+
+void vertical_symmetry_test()
+{
+	CodeLogicFunction f_verticalSymmetry("vertical_symmetry", gridSize, gridVerticalSymmetryFunction);
+	LogicProcessor proc (&f_verticalSymmetry);
+
+	std::vector<bool> expectedSymmetry(testCasesCount, false);
+	std::fill(expectedSymmetry.begin(), expectedSymmetry.begin() + 8, true);
+	std::fill(expectedSymmetry.begin() + 16, expectedSymmetry.begin() + 24, true);
+
+	printf("Testing function: %s\n", f_verticalSymmetry.getName().c_str());
+
+	grid_symmetry_test(&proc, f_verticalSymmetry.getNumInputs(), expectedSymmetry);
+}
+
+void rotational_symmetry_test()
+{
+	CodeLogicFunction f_rotationalSymmetry("rotational_symmetry", gridSize, gridRotationalSymmetryFunction);
+	LogicProcessor proc (&f_rotationalSymmetry);
+
+	std::vector<bool> expectedSymmetry(testCasesCount, false);
+	std::fill(expectedSymmetry.begin(), expectedSymmetry.begin() + 8, true);
+
+	printf("Testing function: %s\n", f_rotationalSymmetry.getName().c_str());
+
+	grid_symmetry_test(&proc, f_rotationalSymmetry.getNumInputs(), expectedSymmetry);
 }
 
 int main()
@@ -188,13 +298,22 @@ int main()
 
 		processor_test(&p_and, 3, inputs);
 	}
-
-	//Code table test
-	auto xorFunction = [](const std::vector<char> &inputs)
 	{
-		const auto trueCount = std::count_if(inputs.begin(), inputs.end(), [](auto element) { return element == 't'; });
-		return trueCount % 2 == 1 ? 't' : 'f';
-	};
-	CodeLogicFunction f_codeXor3("xor3_code", 3, xorFunction);
-	function_test(&f_codeXor3);
+//Code table test
+		auto xorFunction = [](const std::vector<char> &inputs)
+		{
+			const auto trueCount = std::count_if(inputs.begin(), inputs.end(), [](auto element) { return element == 't'; });
+			return trueCount % 2 == 1 ? 't' : 'f';
+		};
+		CodeLogicFunction f_codeXor3("xor3_code", 3, xorFunction);
+		function_test(&f_codeXor3);
+	}
+
+	{
+//Grid tests
+		horizontal_symmetry_test();
+		vertical_symmetry_test();
+		rotational_symmetry_test();
+	}
+	return 0;
 }

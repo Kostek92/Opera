@@ -127,7 +127,7 @@ void LogicProcessor::setInput(int inputIndex, LogicProcessor* processor)
 	m_inputfunctions[inputIndex] = processor;
 }
 
-void LogicProcessor::setInput(int inputIndex, char* source)
+void LogicProcessor::setInput(int inputIndex, const char* source)
 {
 	if(inputIndex < 0 || inputIndex >= m_inputsources.size())
 	{
@@ -162,3 +162,4 @@ char CodeLogicFunction::calculate(const std::vector<char> &inputs) const
 {
 	return m_function(inputs);
 }
+

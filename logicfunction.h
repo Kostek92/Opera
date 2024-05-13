@@ -1,5 +1,4 @@
-#ifndef LOGICFUNCTION_H
-#define LOGICFUNCTION_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -21,7 +20,8 @@ class LogicFunctionBase : public LogicFunctionInterface
 {
 public:
 	/**
-		@param[in] numinputs	How many inputs chars are expected in single row of truth table
+	 *	@param[in] name			Function name. Must be unique
+	 *	@param[in] numinputs	How many inputs chars are expected in single row of truth table
 	 */
 	LogicFunctionBase(const std::string& name, int numinputs);
 	~LogicFunctionBase() override;
@@ -56,17 +56,19 @@ private:
 	const char **m_table;
 };
 
+
+
 /**
  * @brief Implements logical functions as given by a truth table.
  */
+
 class CodeLogicFunction : public LogicFunctionBase
 {
 public:
 	using FunctionType =  std::function<char (const std::vector<char> &)>;
-
 	/**
-	 *	@param[in] table		Function handled truth table logic
-								Inputs/output are char: 't','f','x'
+	 *	@param[in] customfunction	Function handling truth table logic
+									Inputs/output are char: 't','f','x'
 	 */
 	CodeLogicFunction(const std::string& name, int numinputs, FunctionType customfunction);
 	~CodeLogicFunction() override = default;
@@ -95,16 +97,15 @@ public:
 	/**
 	* @brief Set currently processed input
 	*/
-	void setInput(int inputIndex, char* source);
+	void setInput(int inputIndex, const char *source);
 	/**
 	* @brief Calculates logical output from currently set input function and processor
 	*/
 	char process() const;
 
 private:
-	std::vector<char*> m_inputsources;
+	std::vector<const char*> m_inputsources;
 	std::vector<LogicProcessor*> m_inputfunctions;
 	LogicFunctionInterface* m_logicfunction;
 };
 
-#endif // LOGICFUNCTION_H
