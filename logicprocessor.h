@@ -1,28 +1,44 @@
-#pragma once
+#ifndef LOGICPROCESSOR_H
+#define LOGICPROCESSOR_H
 
 #include "logicfunctioninterface.h"
 
-#include <vector>
 
+#include <vector>
 /**
- * @brief Calculate output from logical function. Can be combined with other LogicProcessors
+ * @brief Calculates output from a logical function and can be combined with other LogicProcessors.
  */
 class LogicProcessor
 {
 public:
+	/**
+	 * @brief Constructs a LogicProcessor object with the specified logical function.
+	 *
+	 * @param function Pointer to the logical function interface.
+	 */
 	explicit LogicProcessor(LogicFunctionInterface* function);
 
 	/**
-	* @brief Set additional processor for combinatorial cases
-	*/
-	void setInput(int inputIndex, LogicProcessor* processor);
+	 * @brief Sets an additional processor for combinatorial cases.
+	 *
+	 * @param inputIndex The index of the input for which the processor is being set.
+	 * @param processor Pointer to the LogicProcessor object to be set as an input processor.
+	 */
+	void setInputProcessor(int inputIndex, LogicProcessor* processor);
+
 	/**
-	* @brief Set currently processed input
-	*/
-	void setInput(int inputIndex, const char *source);
+	 * @brief Sets the currently processed input from a source.
+	 *
+	 * @param inputIndex The index of the input being set.
+	 * @param source Pointer to the source data for the input.
+	 */
+	void setInputData(int inputIndex, const char *source);
+
 	/**
-	* @brief Calculates logical output from currently set input function and processor
-	*/
+	 * @brief Calculates the logical output from the currently set inputs and processor.
+	 *
+	 * @return The calculated logical output.
+	 */
 	char process() const;
 
 private:
@@ -30,3 +46,4 @@ private:
 	std::vector<LogicProcessor*> m_inputfunctions;
 	LogicFunctionInterface* m_logicfunction;
 };
+#endif // LOGICPROCESSOR_H

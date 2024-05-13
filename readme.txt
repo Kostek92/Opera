@@ -47,49 +47,42 @@ TASKS:
 
 We hope that you have fun!
 
+------------------------------------------------------
 
-Pierwsza wycena:
-1) 1h
-2) 0.5h
-3) 1h
-4) 1.5h
-5) 1.5h
+Quick estimate vs real time spend
+1) 1h		  3h
+2) 0.5h           1h
+3) 1h		  45min
+4) 1.5h		  0.5h
+5) 1.5h		  2h
 
 I decided to start with point 3. Passing tests are really helpfull base for any refactors
-3) In method void LogicFunctionList::remove(LogicFunction *f) we were skipping 2 nodes of list in every iteration instead of one:
+3) In method void LogicFunctionList::remove(LogicFunction *f) we were skipping 2 nodes of list if elm to delete was found instead of one:
 elm=&((*elm)->m_next
 (*elm) = next. 
 In for loop we first check if *elm is nullptr, then we update elm with (*elm) = next; in for loop body and then we try to update elm=&((*elm)->m_next) again.
-During second update of elm, we use (*elm)->m_next, but *elm is already nullptr which is Undefined Behaviour.
+During second update of elm, we use (*elm)->m_next, but *elm can be already nullptr which is Undefined Behaviour.
 Fix was to use while loop instead which updates *elm only once. 
 
 1) Improvements done
 Use interface for logic function
+Extract classess to separate files
 Use vector for easier memory managment
 Make class members private
-Use const methods when possible
+Mark methods as const when possible
 Use std::string instead of const char* for name
 Remove unused method findFunction
 return nullptr instead of 0
 Use full name in arguments intead of one letters shortcuts
-pragma once: todo? czemu
+Rename setInput into setInputProcessor and setInputData
 
-2) Done
+Improvements not done:
+I kept arguments name in all lower case since it is consistent in whole project
+I didn't use smart pointers in interfaces of classes because all data that comes into classes are local variables in tests
+Some valid unit test framework should be used in tests, but it is beyond the scope of task
 
-3)
+2) Doxygen style documentation added. Obvious methods or parameters where not documented
 
-Prawdziwy czas:
+4) Coded xor example added in testlogicfunction.cpp
 
-3) 1h
-1) 5h
-2) 0.5h
-4) 0.5h
-5) 2h
-
-
-*** Nie zmienilem bo:
-
-nie zmienialem nazw memberkow klas i argumentow bo zachowuja spojnosc 
-I didn't use std::string or smart_pointers assuming that we want to use as few libraries as possible
-
-Nie podoba mi sie ze name jest potrzebny w logicFunctionList i wiaze te klasy ze soba
+5) Horizontal, vertical or rotational symmetry logic processors are validated again testcases.h

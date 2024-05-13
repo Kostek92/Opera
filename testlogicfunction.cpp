@@ -168,7 +168,7 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 
 }
 
-void function_test ( LogicFunctionInterface *func )
+void function_test(LogicFunctionInterface *func)
 {
 	char *inp;
 	char n=func->getNumInputs();
@@ -178,7 +178,7 @@ void function_test ( LogicFunctionInterface *func )
 	inp = new char [n];
 	for (int i=0; i<n; i++)
 	{
-		proc.setInput(i, inp+i);
+		proc.setInputData(i, inp+i);
 	}
 
 	processor_test(&proc, n, inp);
@@ -194,7 +194,7 @@ void grid_symmetry_test(LogicProcessor *proc, int numinputs, const std::vector<b
 	{
 		for (int i=0; i<numinputs; i++)
 		{
-			proc->setInput(i, testcases[testCaseIndex]+i);
+			proc->setInputData(i, testcases[testCaseIndex]+i);
 		}
 		const bool isSymmetrical= proc->process();
 		const bool testCasePassed = isSymmetrical == expectedSymmetry.at(testCaseIndex);
@@ -272,16 +272,15 @@ int main()
 
 	function_test(&f_incomplete);
 
-
 // Combinatorial tests
 
 	{
 		printf("Testing combinatorial not (P and Q)\n");
 		char inputs[2];
 		LogicProcessor p_not(&f_not),  p_and(&f_and2);
-		p_and.setInput(0,inputs);
-		p_and.setInput(1,inputs + 1);
-		p_not.setInput(0,&p_and);
+		p_and.setInputData(0,inputs);
+		p_and.setInputData(1,inputs + 1);
+		p_not.setInputProcessor(0,&p_and);
 
 		processor_test(&p_not, 2, inputs);
 	}
@@ -291,17 +290,18 @@ int main()
 		//  A && !(B || !C)
 		char inputs[3];
 		LogicProcessor p_not0(&f_not), p_not1(&f_not), p_or(&f_or2), p_and(&f_and2);
-		p_not0.setInput(0,inputs+2);
-		p_or.setInput(0,inputs+1);
-		p_or.setInput(1,&p_not0);
-		p_not1.setInput(0,&p_or);
-		p_and.setInput(0,inputs);
-		p_and.setInput(1, &p_not1);
+		p_not0.setInputData(0,inputs+2);
+		p_or.setInputData(0,inputs+1);
+		p_or.setInputProcessor(1,&p_not0);
+		p_not1.setInputProcessor(0,&p_or);
+		p_and.setInputData(0,inputs);
+		p_and.setInputProcessor(1, &p_not1);
 
 		processor_test(&p_and, 3, inputs);
 	}
-	{
+
 //Code table test
+	{
 		auto xorFunction = [](const std::vector<char> &inputs)
 		{
 			const auto trueCount = std::count_if(inputs.begin(), inputs.end(), [](auto element) { return element == 't'; });
@@ -311,8 +311,8 @@ int main()
 		function_test(&f_codeXor3);
 	}
 
-	{
 //Grid tests
+	{
 		horizontal_symmetry_test();
 		vertical_symmetry_test();
 		rotational_symmetry_test();

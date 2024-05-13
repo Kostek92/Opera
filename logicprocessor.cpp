@@ -7,7 +7,7 @@ LogicProcessor::LogicProcessor(LogicFunctionInterface* function)
 	m_inputfunctions.resize(m_logicfunction->getNumInputs(), nullptr);
 }
 
-void LogicProcessor::setInput(int inputIndex, LogicProcessor* processor)
+void LogicProcessor::setInputProcessor(int inputIndex, LogicProcessor* processor)
 {
 	if(inputIndex < 0 || inputIndex >= m_inputfunctions.size())
 	{
@@ -17,7 +17,7 @@ void LogicProcessor::setInput(int inputIndex, LogicProcessor* processor)
 	m_inputfunctions[inputIndex] = processor;
 }
 
-void LogicProcessor::setInput(int inputIndex, const char* source)
+void LogicProcessor::setInputData(int inputIndex, const char* source)
 {
 	if(inputIndex < 0 || inputIndex >= m_inputsources.size())
 	{
