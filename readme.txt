@@ -57,12 +57,12 @@ Quick estimate vs real time spend
 5) 1.5h		  2h
 
 I decided to start with point 3. Passing tests are really helpfull base for any refactors
-3) In method void LogicFunctionList::remove(LogicFunction *f) we were skipping 2 nodes of list if elm to delete was found instead of one:
-elm=&((*elm)->m_next
-(*elm) = next. 
-In for loop we first check if *elm is nullptr, then we update elm with (*elm) = next; in for loop body and then we try to update elm=&((*elm)->m_next) again.
-During second update of elm, we use (*elm)->m_next, but *elm can be already nullptr which is Undefined Behaviour.
-Fix was to use while loop instead which updates *elm only once. 
+3) In method void LogicFunctionList::remove(LogicFunction *f), 
+when we remove last element of list, after line (*elm) = next; elm is pointing to nullptr
+and then we use it in for loop elm=&((*elm)->m_next).
+Dereferencing nullptr is Undefined Behaviour which can cause crash.
+Fix was to use while loop instead which checks if elm is pointing to nullptr before any action on (*elm) is done.
+In while loop we either advancing elm pointer or removing list element (if found) but not both at the same time.
 
 1) Improvements done
 Use interface for logic function
