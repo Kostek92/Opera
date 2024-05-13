@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(opera
-    logicfunction.cpp logicfunction.h testcases.h testlogicfunction.cpp)
+	testcases.h testlogicfunction.cpp
+	logicfunctioninterface.h
+	logicfunctionbase.h logicfunctionbase.cpp
+	tablelogicfunction.h tablelogicfunction.cpp
+	codelogicfunction.h codelogicfunction.cpp
+	logicprocessor.h logicprocessor.cpp)
 
 include(GNUInstallDirs)
 install(TARGETS opera

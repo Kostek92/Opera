@@ -72,6 +72,7 @@ Use std::string instead of const char* for name
 Remove unused method findFunction
 return nullptr instead of 0
 Use full name in arguments intead of one letters shortcuts
+pragma once: todo? czemu
 
 2) Done
 

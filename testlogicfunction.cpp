@@ -6,7 +6,9 @@
 #include <stdio.h>
 #include <algorithm>
 
-#include "logicfunction.h"
+#include "logicprocessor.h"
+#include "tablelogicfunction.h"
+#include "codelogicfunction.h"
 #include "testcases.h"
 
 const char *or2_table [] =
