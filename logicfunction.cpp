@@ -44,7 +44,7 @@ void LogicFunctionList::remove(LogicFunctionInterface *function)
 		}
 		else
 		{
-			(*elm) = (*elm)->m_next;
+			elm = &((*elm)->m_next);
 		}
 	}
 }
